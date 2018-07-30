@@ -1,209 +1,47 @@
-var model = require("./model")
-
-SchoolCourse = model.SchoolCourse
-SchoolBlock = model.SchoolBlock
-
-var updatingObjects = false
-
-function singleSpace(str)
-{
-    return str.replace(/\s+/g, " ")
-}
-
-var ProgressBar = require('progress');
-var bar = null
-var barEnabled = false
-
-function getObjectsFromPDF()
-{
-    if (barEnabled)
-        bar = new ProgressBar(':bar', { total: 100 })
-
-    var objectsPromise = new Promise( (resolve, reject) => {
-        var PdfReader = require("pdfreader").PdfReader;
-        var rawText = Array()
-
-        //var startIndexTest = ()
-        //var pageBreakTest = ()
-        var fileURL = "2018F.pdf"
-        //var fileURL = "http://lhs-sfusd-ca.schoolloop.com/file/1239686293231/1239686294994/6183066267819394189.pdf"
-
-        console.log("   Loading from PDF...")
-
-        new PdfReader().parseFileItems(fileURL, function(err, item){
-            if (item && item.text)
-            {
-                rawText.push(item.text)
-            }
-            else if (!item)
-            {
-                console.log("   Loaded rawText!")
-
-                if (barEnabled)
-                    bar.tick(100)
-
-                var objects = getObjectsFromRawText(rawText)
-
-                resolve(objects)
-            }
-        })
-    })
-
-    return objectsPromise
-}
-
-function getObjectsFromRawText(rawText)
-{
-    var courses = []
-    var blocks = []
-
-    var startIndex = null
-
-    for (text in rawText)
-    {
-        if (rawText[text] == "1" && text != 1)
-        {
-            startIndex = text
-            break
-        }
-    }
-
-    console.log("   Start Index: " + startIndex)
-
-    if (barEnabled)
-        bar = new ProgressBar(':bar', { total: rawText.length })
-
-    console.log("   Creating Objects...")
-
-    var tmpArray = []
-    var skipsLeft = 0
-    var departmentNumber = "1"
-    var startedSkipping = false
-
-    for (text in rawText)
-    {
-        if (barEnabled)
-            bar.tick()
-
-        if (rawText[text] == rawText[0])
-        {
-            tmpArray = []
-            skipsLeft = startIndex
-        }
-
-        if (skipsLeft > 0)
-        {
-            skipsLeft -= 1
-            continue
-        }
-
-        if (tmpArray.length == 0 && parseInt(rawText[text]) != parseInt(departmentNumber) && parseInt(rawText[text])-1 != parseInt(departmentNumber))
-        {
-            if (!startedSkipping)
-            {
-                startedSkipping = true
-                courses.pop()
-                blocks.pop()
-            }
-            continue
-        }
-        else if (tmpArray.length == 0 && parseInt(rawText[text])-1 == parseInt(departmentNumber) && rawText[text].length == 1)
-        {
-            departmentNumber = rawText[text]
-        }
-
-        startedSkipping = false
-
-        tmpArray.push(rawText[text])
-
-        if (tmpArray.length == 3)
-        {
-            var newCourse = new SchoolCourse(tmpArray[0].trim(), tmpArray[1].trim(), singleSpace(tmpArray[2]))
-
-            var courseExists = false
-            for (course in courses)
-            {
-                if (courses[course].departmentNum == newCourse.departmentNum, courses[course].courseCode == newCourse.courseCode, courses[course].courseName == newCourse.courseName)
-                {
-                    courseExists = true
-                    break
-                }
-            }
-
-            if (!courseExists)
-            {
-                courses.push(newCourse)
-            }
-        }
-
-        if (tmpArray.length == 8)
-        {
-            var newBlock = new SchoolBlock(tmpArray[3].trim(), tmpArray[4].trim(), tmpArray[5].trim(), singleSpace(tmpArray[6]), singleSpace(tmpArray[7]), tmpArray[1].trim())
-
-            blocks.push(newBlock)
-
-            tmpArray = []
-        }
-    }
-
-    console.log("   Created Objects!")
-
-    return [courses, blocks]
-}
-
-async function loadObjectsToSQL(courses, blocks, completion)
-{
-    if (barEnabled)
-        bar = new ProgressBar(':bar', { total: courses.length + blocks.length })
-
-    for (course in courses)
-    {
-        var coursePromise = courses[course].loadToSQL()
-        await coursePromise
-
-        if (barEnabled)
-            bar.tick()
-    }
-
-    for (block in blocks)
-    {
-        var blockPromise = blocks[block].loadToSQL()
-        await blockPromise
-
-        if (barEnabled)
-            bar.tick()
-    }
-
-    completion()
-}
-
-function updateSQLObjects(completion)
-{
-    updatingObjects = true
-
-    var objectsPromise = getObjectsFromPDF()
-    objectsPromise.then( value => {
-        var courses = value[0]
-        var blocks = value[1]
-
-        console.log("   Loading objects to SQL...")
-
-        loadObjectsToSQL(courses, blocks, function() {
-            console.log("   Loaded to SQL!")
-            updatingObjects = false
-
-            if (completion != null)
-            {
-                completion()
-            }
-        })
-    })
-}
-
-//updateSQLObjects()
-
 const express = require('express')
 const app = express()
+
+var updater = require("./updater.js")
+var updatingObjects = false
+
+var program = require('commander');
+program
+    .version("pre-1")
+    .option('-d, --download', 'Download and Update Data')
+    .option('-u, --url [url]', 'Set URL')
+    .parse(process.argv);
+
+if (program.download)
+{
+    updateObjects()
+}
+
+function updateObjects()
+{
+    updatingObjects = true
+    downloadPDFFile(function() {
+        updater.updateSQLObjects(function() {
+            updatingObjects = false
+        })
+    })
+}
+
+function downloadPDFFile(completion)
+{
+    var url = program.url ? program.url : 'http://jjcooley.ddns.net/2018F.pdf'
+    console.log("Downloading From " + url)
+    var download = require('download-file')
+    var options = {
+        directory: "./",
+        filename: "courses.pdf"
+    }
+
+    download(url, options, function(err) {
+        if (err) throw err
+        console.log("Downloaded File!")
+        completion()
+    })
+}
 
 app.get('/query/', function(req, res) {
     if (!updatingObjects)
@@ -233,10 +71,26 @@ app.get('/query/', function(req, res) {
 app.get('/update/', function(req, res) {
     if (!updatingObjects)
     {
-        updateSQLObjects(function() {
-            console.log("GET /update/ => OK")
-            res.status(200).send("OK")
-        })
+        updatingObjects = true
+
+        var updateObjectsFunction = function() {
+            updater.updateSQLObjects(function() {
+                console.log("GET /update/ => OK")
+                res.status(200).send("OK")
+                updatingObjects = false
+            })
+        }
+
+        if (req.query.download)
+        {
+            downloadPDFFile(function() {
+                updateObjectsFunction()
+            })
+        }
+        else
+        {
+            updateObjectsFunction()
+        }
     }
     else
     {
