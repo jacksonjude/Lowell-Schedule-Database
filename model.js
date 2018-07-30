@@ -1,3 +1,6 @@
+var sql = require("./sql.js")
+var con = sql.con
+
 function SchoolCourse(departmentNum, courseCode, courseName) {
     this.departmentNum = departmentNum
     this.courseCode = courseCode
@@ -5,17 +8,33 @@ function SchoolCourse(departmentNum, courseCode, courseName) {
 }
 
 SchoolCourse.prototype.loadToSQL = function() {
-    var con = require("./sql.js").con
-    var course = this
+    var loadToSQLPromise = new Promise( (resolve, reject) => {
+        var course = this
 
-    con.connect(function(err) {
-      if (err) throw err;
+        var connectionPromise = sql.connectWithPromise()
+        connectionPromise.then(value => {
+            con.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields) {
+                if (result == null || parseInt(result[0]["count(*)"]) == 0)
+                {
+                    con.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')", function(err, result, fields) {
+                        resolve()
+                    })
+                }
+                else
+                {
+                    resolve()
+                }
+            })
+        }, reason => {
+            console.log(reason)
+        })
+    })
 
-      con.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')")
-    });
+    return loadToSQLPromise
 }
 
-function SchoolBlock(blockCode, blockNum, roomNum, teacher, courseCode) {
+function SchoolBlock(sectionNumber, blockCode, blockNum, roomNum, teacher, courseCode) {
+    this.sectionNumber = sectionNumber
     this.blockCode = blockCode
     this.blockNum = blockNum
     this.roomNum = roomNum
@@ -24,14 +43,29 @@ function SchoolBlock(blockCode, blockNum, roomNum, teacher, courseCode) {
 }
 
 SchoolBlock.prototype.loadToSQL = function() {
-    var con = require("./sql.js").con
-    var block = this
+    var loadToSQLPromise = new Promise( (resolve, reject) => {
+        var block = this
 
-    con.connect(function(err) {
-      if (err) throw err;
+        var connectionPromise = sql.connectWithPromise()
+        connectionPromise.then(value => {
+            con.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields) {
+                if (result == null || parseInt(result[0]["count(*)"]) == 0)
+                {
+                    con.query("insert into blocks values ('" + block.sectionNumber + "', '" + block.blockCode + "', " + block.blockNum + ", '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')", function(err, result, fields) {
+                        resolve()
+                    })
+                }
+                else
+                {
+                    resolve()
+                }
+            })
+        }, reason => {
+            console.log(reason)
+        })
+    })
 
-      con.query("insert into courses values ('" + block.blockCode + "', '" + block.blockNum + "', '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')")
-    });
+    return loadToSQLPromise
 }
 
 exports.SchoolCourse = SchoolCourse
