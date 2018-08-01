@@ -16,7 +16,6 @@ var connectWithPromise = function()
               if (err)
               {
                   reject(err)
-                  throw err;
               }
 
               resolve()
@@ -30,6 +29,8 @@ var connectWithPromise = function()
 
     return connectionPromise
 }
+
+con.on('error', function(err) { console.log(err) });
 
 exports.connectWithPromise = connectWithPromise
 exports.con = con
