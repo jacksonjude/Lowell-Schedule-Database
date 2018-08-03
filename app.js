@@ -53,7 +53,7 @@ function downloadPDFFile(url, completion)
 
 
 app.use(express.json())
-app.use(express.urlencoded())
+app.use(express.urlencoded({ extended: true }))
 
 app.get('/query/', function(req, res) {
     if (!updatingObjects)
@@ -137,7 +137,7 @@ app.post('/session/', function(req, res) {
             }
             else
             {
-                console.log("POST /session/?command=??? => ERROR: Command Does Not Exist")
+                console.log("POST /session/?command=" + reqBody.command + " => ERROR: Command Does Not Exist")
             }
 
             sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
