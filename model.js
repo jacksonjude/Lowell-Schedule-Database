@@ -1,5 +1,5 @@
 var sql = require("./sql.js")
-var con = sql.con
+var con = sql.getConnection()
 
 function SchoolCourse(departmentNum, courseCode, courseName) {
     this.departmentNum = departmentNum
@@ -11,8 +11,8 @@ SchoolCourse.prototype.loadToSQL = function() {
     var loadToSQLPromise = new Promise( (resolve, reject) => {
         var course = this
 
-        var connectionPromise = sql.connectWithPromise()
-        connectionPromise.then(value => {
+        //var connectionPromise = sql.connectWithPromise()
+        //connectionPromise.then(value => {
             con.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields) {
                 if (result == null || parseInt(result[0]["count(*)"]) == 0)
                 {
@@ -25,9 +25,9 @@ SchoolCourse.prototype.loadToSQL = function() {
                     resolve()
                 }
             })
-        }, reason => {
-            console.log(reason)
-        })
+        //}, reason => {
+        //    console.log(reason)
+        //})
     })
 
     return loadToSQLPromise
@@ -46,8 +46,8 @@ SchoolBlock.prototype.loadToSQL = function() {
     var loadToSQLPromise = new Promise( (resolve, reject) => {
         var block = this
 
-        var connectionPromise = sql.connectWithPromise()
-        connectionPromise.then(value => {
+        //var connectionPromise = sql.connectWithPromise()
+        //connectionPromise.then(value => {
             con.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields) {
                 if (result == null || parseInt(result[0]["count(*)"]) == 0)
                 {
@@ -60,9 +60,9 @@ SchoolBlock.prototype.loadToSQL = function() {
                     resolve()
                 }
             })
-        }, reason => {
-            console.log(reason)
-        })
+        //}, reason => {
+        //    console.log(reason)
+        //})
     })
 
     return loadToSQLPromise

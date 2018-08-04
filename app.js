@@ -59,10 +59,10 @@ app.get('/query/', function(req, res) {
     if (!updatingObjects)
     {
         var sql = require("./sql.js")
-        var con = sql.con
+        var con = sql.getConnection()
 
-        var connectionPromise = sql.connectWithPromise()
-        connectionPromise.then(value => {
+        //var connectionPromise = sql.connectWithPromise()
+        //connectionPromise.then(value => {
             var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\"" + req.query.value + "\"" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
             sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
 
@@ -74,9 +74,9 @@ app.get('/query/', function(req, res) {
             con.query(sqlString, function (err, result, fields) {
                 res.json(result)
             })
-        }, reason => {
-            console.log(reason)
-        })
+        //}, reason => {
+        //    console.log(reason)
+        //})
     }
     else
     {
@@ -109,10 +109,10 @@ app.post('/session/', function(req, res) {
     if (!updatingObjects)
     {
         var sql = require("./sql.js")
-        var con = sql.con
+        var con = sql.getConnection()
 
-        var connectionPromise = sql.connectWithPromise()
-        connectionPromise.then(value => {
+        //var connectionPromise = sql.connectWithPromise()
+        //connectionPromise.then(value => {
             var sqlString = ""
 
             var reqBody = req.body
@@ -145,9 +145,9 @@ app.post('/session/', function(req, res) {
             con.query(sqlString, function (err, result, fields) {
                 res.json(result)
             })
-        }, reason => {
-            console.log(reason)
-        })
+        //}, reason => {
+        //    console.log(reason)
+        //})
     }
     else
     {
