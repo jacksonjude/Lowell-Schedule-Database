@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const fs = require('fs')
 
 var updater = require("./updater.js")
 var updatingObjects = false
@@ -12,12 +13,29 @@ program
     .option('-i, --info', 'Info Console Output')
     .parse(process.argv);
 
+if (program.url)
+{
+    var settings = getSettings()
+    settings["defaultSourceURL"] = program.url
+    writeSettings(settings)
+}
+
+const defaultSource = getSettings()["defaultSourceURL"]
+
+function getSettings()
+{
+    return JSON.parse(fs.readFileSync('./settings.json', 'utf8'))
+}
+
+function writeSettings(array)
+{
+    fs.writeFileSync('./settings.json', JSON.stringify(array))
+}
+
 if (program.download)
 {
     updateObjects()
 }
-
-const defaultSource = 'http://jjcooley.ddns.net/courses.pdf'
 
 function updateObjects()
 {
@@ -61,22 +79,17 @@ app.get('/query/', function(req, res) {
         var sql = require("./sql.js")
         var con = sql.getConnection()
 
-        //var connectionPromise = sql.connectWithPromise()
-        //connectionPromise.then(value => {
-            var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\"" + req.query.value + "\"" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
-            sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
+        var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\"" + req.query.value + "\"" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
+        sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
 
-            if (program.info)
-            {
-                console.log("GET /query/ => " + sqlString)
-            }
+        if (program.info)
+        {
+            console.log("GET /query/ => " + sqlString)
+        }
 
-            con.query(sqlString, function (err, result, fields) {
-                res.json(result)
-            })
-        //}, reason => {
-        //    console.log(reason)
-        //})
+        con.query(sqlString, function (err, result, fields) {
+            res.json(result)
+        })
     }
     else
     {
@@ -111,43 +124,38 @@ app.post('/session/', function(req, res) {
         var sql = require("./sql.js")
         var con = sql.getConnection()
 
-        //var connectionPromise = sql.connectWithPromise()
-        //connectionPromise.then(value => {
-            var sqlString = ""
+        var sqlString = ""
 
-            var reqBody = req.body
+        var reqBody = req.body
 
-            if (reqBody.command == "save")
+        if (reqBody.command == "save")
+        {
+            sqlString = "replace into sessions set id=\"" + reqBody.id + "\", coursesJSON=\'" + reqBody.coursesJSON + "\', teachersJSON=\'" + reqBody.teachersJSON + "\', offBlocksJSON=\'" + reqBody.offBlocksJSON + "\'"
+
+            if (program.info)
             {
-                sqlString = "replace into sessions set id=\"" + reqBody.id + "\", coursesJSON=\'" + reqBody.coursesJSON + "\', teachersJSON=\'" + reqBody.teachersJSON + "\', offBlocksJSON=\'" + reqBody.offBlocksJSON + "\'"
-
-                if (program.info)
-                {
-                    console.log("POST /session/?command=save => " + sqlString)
-                }
+                console.log("POST /session/?command=save => " + sqlString)
             }
-            else if (reqBody.command == "load")
+        }
+        else if (reqBody.command == "load")
+        {
+            sqlString = "select * from sessions where id=\"" + reqBody.id + "\""
+
+            if (program.info)
             {
-                sqlString = "select * from sessions where id=\"" + reqBody.id + "\""
-
-                if (program.info)
-                {
-                    console.log("POST /session/?command=load => " + sqlString)
-                }
+                console.log("POST /session/?command=load => " + sqlString)
             }
-            else
-            {
-                console.log("POST /session/?command=" + reqBody.command + " => ERROR: Command Does Not Exist")
-            }
+        }
+        else
+        {
+            console.log("POST /session/?command=" + reqBody.command + " => ERROR: Command Does Not Exist")
+        }
 
-            sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
+        sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
 
-            con.query(sqlString, function (err, result, fields) {
-                res.json(result)
-            })
-        //}, reason => {
-        //    console.log(reason)
-        //})
+        con.query(sqlString, function (err, result, fields) {
+            res.json(result)
+        })
     }
     else
     {

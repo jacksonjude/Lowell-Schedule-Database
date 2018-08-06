@@ -11,23 +11,18 @@ SchoolCourse.prototype.loadToSQL = function() {
     var loadToSQLPromise = new Promise( (resolve, reject) => {
         var course = this
 
-        //var connectionPromise = sql.connectWithPromise()
-        //connectionPromise.then(value => {
-            con.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields) {
-                if (result == null || parseInt(result[0]["count(*)"]) == 0)
-                {
-                    con.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')", function(err, result, fields) {
-                        resolve()
-                    })
-                }
-                else
-                {
+        con.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields) {
+            if (result == null || parseInt(result[0]["count(*)"]) == 0)
+            {
+                con.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')", function(err, result, fields) {
                     resolve()
-                }
-            })
-        //}, reason => {
-        //    console.log(reason)
-        //})
+                })
+            }
+            else
+            {
+                resolve()
+            }
+        })
     })
 
     return loadToSQLPromise
@@ -46,23 +41,18 @@ SchoolBlock.prototype.loadToSQL = function() {
     var loadToSQLPromise = new Promise( (resolve, reject) => {
         var block = this
 
-        //var connectionPromise = sql.connectWithPromise()
-        //connectionPromise.then(value => {
-            con.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields) {
-                if (result == null || parseInt(result[0]["count(*)"]) == 0)
-                {
-                    con.query("insert into blocks values ('" + block.sectionNumber + "', '" + block.blockCode + "', " + block.blockNum + ", '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')", function(err, result, fields) {
-                        resolve()
-                    })
-                }
-                else
-                {
+        con.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields) {
+            if (result == null || parseInt(result[0]["count(*)"]) == 0)
+            {
+                con.query("insert into blocks values ('" + block.sectionNumber + "', '" + block.blockCode + "', " + block.blockNum + ", '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')", function(err, result, fields) {
                     resolve()
-                }
-            })
-        //}, reason => {
-        //    console.log(reason)
-        //})
+                })
+            }
+            else
+            {
+                resolve()
+            }
+        })
     })
 
     return loadToSQLPromise
