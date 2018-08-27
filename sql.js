@@ -1,4 +1,4 @@
-var mysql = require('mysql');
+/*var mysql = require('mysql');
 
 var con = mysql.createConnection({
   host: "localhost",
@@ -33,4 +33,24 @@ handleDisconnect(con)
 
 exports.getConnection = function() {
     return con
+}*/
+
+var mysql = require('mysql')
+
+exports.query = function(sql, callback)
+{
+    var connection = mysql.createConnection({
+        host     : 'localhost',
+        user     : 'lowellscheduleremote',
+        password : 'GeeImaTree',
+        database : 'lowellschedule'
+    })
+
+    connection.on('error', function() {})
+
+    connection.query(sql, function(err, results) {
+        callback(err, results)
+
+        connection.end()
+    })
 }

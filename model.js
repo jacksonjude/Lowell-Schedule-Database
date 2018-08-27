@@ -1,5 +1,5 @@
 var sql = require("./sql.js")
-var con = sql.getConnection()
+//var con = sql.getConnection()
 
 function SchoolCourse(departmentNum, courseCode, courseName) {
     this.departmentNum = departmentNum
@@ -11,10 +11,10 @@ SchoolCourse.prototype.loadToSQL = function() {
     var loadToSQLPromise = new Promise( (resolve, reject) => {
         var course = this
 
-        con.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields) {
+        sql.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields) {
             if (result == null || parseInt(result[0]["count(*)"]) == 0)
             {
-                con.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')", function(err, result, fields) {
+                sql.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')", function(err, result, fields) {
                     resolve()
                 })
             }
@@ -41,10 +41,10 @@ SchoolBlock.prototype.loadToSQL = function() {
     var loadToSQLPromise = new Promise( (resolve, reject) => {
         var block = this
 
-        con.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields) {
+        sql.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields) {
             if (result == null || parseInt(result[0]["count(*)"]) == 0)
             {
-                con.query("insert into blocks values ('" + block.sectionNumber + "', '" + block.blockCode + "', " + block.blockNum + ", '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')", function(err, result, fields) {
+                sql.query("insert into blocks values ('" + block.sectionNumber + "', '" + block.blockCode + "', " + block.blockNum + ", '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')", function(err, result, fields) {
                     resolve()
                 })
             }

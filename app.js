@@ -72,12 +72,13 @@ function downloadPDFFile(url, completion)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(require('cors')({url:"https://jacksonjude.github.io"}))
 
 app.get('/query/', function(req, res) {
     if (!updatingObjects)
     {
-        var sql = require("./sql.js")
-        var con = sql.getConnection()
+        //var sql = require("./sql.js")
+        //var con = sql.getConnection()
 
         var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\"" + req.query.value + "\"" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
         sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
@@ -87,7 +88,7 @@ app.get('/query/', function(req, res) {
             console.log("GET /query/ => " + sqlString)
         }
 
-        con.query(sqlString, function (err, result, fields) {
+        require("./sql.js").query(sqlString, function (err, result, fields) {
             res.json(result)
         })
     }
@@ -121,8 +122,8 @@ app.get('/update/', function(req, res) {
 app.post('/session/', function(req, res) {
     if (!updatingObjects)
     {
-        var sql = require("./sql.js")
-        var con = sql.getConnection()
+        //var sql = require("./sql.js")
+        //var con = sql.getConnection()
 
         var sqlString = ""
 
@@ -153,7 +154,7 @@ app.post('/session/', function(req, res) {
 
         sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
 
-        con.query(sqlString, function (err, result, fields) {
+        require("./sql.js").query(sqlString, function (err, result, fields) {
             res.json(result)
         })
     }
