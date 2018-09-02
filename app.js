@@ -165,4 +165,8 @@ app.post('/session/', function(req, res) {
     }
 })
 
+app.get('/ping/', function(req, res) {
+    res.send("618")
+})
+
 app.listen(3009, () => console.log('App listening on port 3009'))
