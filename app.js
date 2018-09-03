@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const fs = require('fs')
+const PORT = process.env.PORT || 3009
 
 var updater = require("./updater.js")
 var updatingObjects = false
@@ -169,4 +170,4 @@ app.get('/ping/', function(req, res) {
     res.send("618")
 })
 
-app.listen(3009, () => console.log('App listening on port 3009'))
+app.listen(PORT, () => console.log('App listening on port ' + PORT))
