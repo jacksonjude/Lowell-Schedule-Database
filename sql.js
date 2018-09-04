@@ -39,19 +39,19 @@ var mysql = require('mysql')
 
 exports.query = function(sql, callback)
 {
-    var connection = mysql.createConnection({
-        host     : 'jjcooley.ddns.net',
+    /*var connection = mysql.createConnection({
+        host     : 'localhost',
         user     : 'lowellscheduleremote',
         password : 'GeeImaTree',
         database : 'lowellschedule'
-    })
+    })*/
 
-    /*var connection = mysql.createConnection({
+    var connection = mysql.createConnection({
         host     : 'sql3.freemysqlhosting.net',
         user     : 'sql3254932',
         password : 'e1vg5ffILT',
         database : 'sql3254932'
-    })*/
+    })
 
     connection.on('error', function() {})
 
