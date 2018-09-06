@@ -132,7 +132,7 @@ app.post('/session/', function(req, res) {
 
         if (reqBody.command == "save")
         {
-            sqlString = "replace into sessions set id=\"" + reqBody.id + "\", coursesJSON=\'" + reqBody.coursesJSON + "\', teachersJSON=\'" + reqBody.teachersJSON + "\', offBlocksJSON=\'" + reqBody.offBlocksJSON + "\', filtersJSON=\'" + reqBody.filtersJSON + "\', favoriteSchedulesJSON=\'" + reqBody.favoriteSchedulesJSON + "\'"
+            sqlString = "replace into sessions set id=\'" + reqBody.id + "\', coursesJSON=\'" + reqBody.coursesJSON + "\', teachersJSON=\'" + reqBody.teachersJSON + "\', offBlocksJSON=\'" + reqBody.offBlocksJSON + "\', filtersJSON=\'" + reqBody.filtersJSON + "\', favoriteSchedulesJSON=\'" + reqBody.favoriteSchedulesJSON + "\'"
 
             if (program.info)
             {
@@ -141,7 +141,7 @@ app.post('/session/', function(req, res) {
         }
         else if (reqBody.command == "load")
         {
-            sqlString = "select * from sessions where id=\"" + reqBody.id + "\""
+            sqlString = "select * from sessions where id=\'" + reqBody.id + "\'"
 
             if (program.info)
             {
