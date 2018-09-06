@@ -89,8 +89,8 @@ app.get('/query/', function(req, res) {
             console.log("GET /query/ => " + sqlString)
         }
 
-        require("./sql.js").query(sqlString, function (err, result, fields) {
-            res.json(result)
+        require("./sql.js").query(sqlString, function (err, result) {
+            res.json(result.rows)
         })
     }
     else
