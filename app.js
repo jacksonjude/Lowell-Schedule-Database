@@ -90,7 +90,7 @@ app.get('/query/', function(req, res) {
         }
 
         require("./sql.js").query(sqlString, function (err, result) {
-            res.json(result.rows)
+            res.json(result ? result.rows : [])
         })
     }
     else
