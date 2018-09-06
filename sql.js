@@ -35,29 +35,59 @@ exports.getConnection = function() {
     return con
 }*/
 
-var mysql = require('mysql')
+//var mysql = require('mysql')
+
+/*var connection = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'lowellscheduleremote',
+    password : 'GeeImaTree',
+    database : 'lowellschedule'
+})*/
+
+/*var connection = mysql.createConnection({
+    host     : 'sql3.freemysqlhosting.net',
+    user     : 'sql3254932',
+    password : 'e1vg5ffILT',
+    database : 'sql3254932'
+})
+
+connection.on('error', function() {})
+
+connection.query(sql, function(err, results) {
+    callback(err, results)
+
+    connection.end()
+})*/
+
+//const url = {user:"dmxmswykbqklyo", password:"93e4e3b96f3654dcc08388be361f61305e4dd2aa2103c28834c1e6db9a4433b4", host:"ec2-23-23-216-40.compute-1.amazonaws.com", port:5432, database:"d7ej3gchrhpje", ssl:true}
+
+
+const { Client } = require('pg')
+//const url = "postgres://dmxmswykbqklyo:93e4e3b96f3654dcc08388be361f61305e4dd2aa2103c28834c1e6db9a4433b4@ec2-23-23-216-40.compute-1.amazonaws.com:5432/d7ej3gchrhpje?ssl=true"
+const url = process.env.DATABASE_URL + "?ssl=true"
+var connection
+var disconnectTimer
 
 exports.query = function(sql, callback)
 {
-    /*var connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'lowellscheduleremote',
-        password : 'GeeImaTree',
-        database : 'lowellschedule'
-    })*/
+    if (connection == null)
+    {
+        connection = new Client(url)
+        connection.connect()
+    }
 
-    var connection = mysql.createConnection({
-        host     : 'sql3.freemysqlhosting.net',
-        user     : 'sql3254932',
-        password : 'e1vg5ffILT',
-        database : 'sql3254932'
-    })
-
-    connection.on('error', function() {})
+    if (disconnectTimer != null)
+    {
+        clearTimeout(disconnectTimer)
+    }
 
     connection.query(sql, function(err, results) {
         callback(err, results)
 
-        connection.end()
+        clearTimeout(disconnectTimer)
+        disconnectTimer = setTimeout(function() {
+            connection.end()
+            connection = null
+        }, 10000)
     })
 }
