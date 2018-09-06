@@ -156,7 +156,7 @@ app.post('/session/', function(req, res) {
         sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
 
         require("./sql.js").query(sqlString, function (err, result, fields) {
-            res.json(result)
+            res.json(result ? result.rows : [])
         })
     }
     else
