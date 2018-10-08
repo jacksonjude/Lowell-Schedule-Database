@@ -1,5 +1,4 @@
 var sql = require("./sql.js")
-//var con = sql.getConnection()
 
 function SchoolCourse(departmentNum, courseCode, courseName) {
     this.departmentNum = departmentNum
