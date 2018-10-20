@@ -164,7 +164,7 @@ app.get('/ping/', function(req, res) {
 
 app.listen(PORT, () => console.log('App listening on port ' + PORT))
 
-var http = require("http")
+/*var http = require("http")
 setInterval(function() {
     http.get("http://scheduledata.herokuapp.com/ping")
-}, 300000)
+}, 300000)*/
