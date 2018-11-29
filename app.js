@@ -182,8 +182,7 @@ var pingFunction = function() {
   require("./sql.js").query("select * from waketimes", function (err, result, fields) {
     if (result)
     {
-      console.log(result.rows)
-      for (resultRow in JSON.parse(result ? result.rows : []))
+      for (resultRow in result.rows)
       {
         if (parseInt(resultRow.starttime) <= parseInt(Date.now()) && parseInt(resultRow.endtime) >= parseInt(Date.now()))
         {
