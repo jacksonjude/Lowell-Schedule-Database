@@ -95,6 +95,11 @@ app.get('/query/', function(req, res) {
     console.log("GET /query/ => ERROR: Updating Objects!")
     res.status(500).send("ERROR: Updating Objects!")
   }
+
+  if (!pingSet)
+  {
+    setTimeout(pingFunction, 300000)
+  }
 })
 
 app.get('/update/', function(req, res) {
@@ -115,8 +120,6 @@ app.get('/update/', function(req, res) {
     console.log("GET /update/ => ERROR: Already Updating Objects!")
     res.status(500).send("ERROR: Already Updating Objects!")
   }
-
-  setTimeout(pingFunction, 300000)
 })
 
 app.post('/session/', function(req, res) {
@@ -168,16 +171,20 @@ app.get('/ping/', function(req, res) {
 app.listen(PORT, () => console.log('App listening on port ' + PORT))
 
 var http = require("http")
+var pingSet = false
 var pingFunction = function() {
+  pingSet = false
+
   http.get(process.env.HEROKU_URL + "/ping")
 
-  require("./sql.js").query(sqlString, function (err, result, fields) {
+  require("./sql.js").query("select * from waketimes", function (err, result, fields) {
     if (result && result.rows)
     {
       for (resultRow in result.rows)
       {
         if (resultRow.starttime <= Date.now().getTime() && resultRow.endtime >= Date.now().getTime())
         {
+          pingSet = true
           setTimeout(pingFunction, 300000)
           break
         }
@@ -185,4 +192,6 @@ var pingFunction = function() {
     }
   })
 }
+
 setTimeout(pingFunction, 300000)
+pingSet = true
