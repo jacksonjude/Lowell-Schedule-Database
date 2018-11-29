@@ -177,6 +177,8 @@ var pingFunction = function() {
 
   http.get(process.env.HEROKU_URL + "/ping")
 
+  console.log(Date.now())
+
   require("./sql.js").query("select * from waketimes", function (err, result, fields) {
     if (result && result.rows)
     {
