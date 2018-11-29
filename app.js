@@ -184,6 +184,7 @@ var pingFunction = function() {
     {
       for (resultRow in result.rows)
       {
+        console.log(resultRow)
         console.log(resultRow.starttime)
         console.log(resultRow.endtime)
         console.log(Date.now())
