@@ -164,7 +164,7 @@ app.post('/session/', function(req, res) {
 })
 
 app.get('/ping/', function(req, res) {
-  console.log("GET /ping/ => 618")
+  //console.log("GET /ping/ => 618")
   res.send("618")
 })
 
@@ -184,7 +184,7 @@ var pingFunction = function() {
     {
       for (resultRow in result.rows)
       {
-        if (resultRow.starttime <= Date.now() && resultRow.endtime >= Date.now())
+        if (parseInt(resultRow.starttime) <= parseInt(Date.now()) && parseInt(resultRow.endtime) >= parseInt(Date.now()))
         {
           pingSet = true
           setTimeout(pingFunction, process.env.PING_INTERVAL)
