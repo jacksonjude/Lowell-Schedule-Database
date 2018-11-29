@@ -184,6 +184,11 @@ var pingFunction = function() {
     {
       for (resultRow in result.rows)
       {
+        console.log(resultRow.starttime)
+        console.log(resultRow.endtime)
+        console.log(Date.now())
+        console.log(parseInt(resultRow.starttime) <= parseInt(Date.now()))
+        console.log(parseInt(resultRow.endtime) >= parseInt(Date.now()))
         if (parseInt(resultRow.starttime) <= parseInt(Date.now()) && parseInt(resultRow.endtime) >= parseInt(Date.now()))
         {
           pingSet = true
