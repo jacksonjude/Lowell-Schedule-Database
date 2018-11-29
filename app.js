@@ -182,7 +182,7 @@ var pingFunction = function() {
     {
       for (resultRow in result.rows)
       {
-        if (resultRow.starttime <= Date.now().getTime() && resultRow.endtime >= Date.now().getTime())
+        if (resultRow.starttime <= Date.now() && resultRow.endtime >= Date.now())
         {
           pingSet = true
           setTimeout(pingFunction, 300000)
