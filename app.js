@@ -98,6 +98,7 @@ app.get('/query/', function(req, res) {
 
   if (!pingSet)
   {
+    pingSet = true
     setTimeout(pingFunction, process.env.PING_INTERVAL)
   }
 })
@@ -202,4 +203,3 @@ var pingFunction = function() {
 }
 
 setTimeout(pingFunction, process.env.PING_INTERVAL)
-pingSet = true
