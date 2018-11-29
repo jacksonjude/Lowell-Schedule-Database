@@ -1,4 +1,4 @@
-const express = require('express')
+process.env.PING_INTERVALconst express = require('express')
 const app = express()
 const fs = require('fs')
 const PORT = process.env.PORT || 3009
@@ -98,7 +98,7 @@ app.get('/query/', function(req, res) {
 
   if (!pingSet)
   {
-    setTimeout(pingFunction, 300000)
+    setTimeout(pingFunction, process.env.PING_INTERVAL)
   }
 })
 
@@ -185,7 +185,7 @@ var pingFunction = function() {
         if (resultRow.starttime <= Date.now() && resultRow.endtime >= Date.now())
         {
           pingSet = true
-          setTimeout(pingFunction, 300000)
+          setTimeout(pingFunction, process.env.PING_INTERVAL)
           break
         }
       }
@@ -193,5 +193,5 @@ var pingFunction = function() {
   })
 }
 
-setTimeout(pingFunction, 300000)
+setTimeout(pingFunction, process.env.PING_INTERVAL)
 pingSet = true
