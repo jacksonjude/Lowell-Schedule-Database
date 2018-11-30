@@ -8,11 +8,11 @@ var updatingObjects = false
 
 var program = require('commander');
 program
-    .version("0.1")
-    .option('-d, --download', 'Download and Update Data')
-    .option('-u, --url [url]', 'Set URL')
-    .option('-i, --info', 'Info Console Output')
-    .parse(process.argv);
+  .version("0.1")
+  .option('-d, --download', 'Download and Update Data')
+  .option('-u, --url [url]', 'Set URL')
+  .option('-i, --info', 'Info Console Output')
+  .parse(process.argv);
 
 if (program.url)
 {
@@ -42,8 +42,10 @@ function updateObjects()
 {
   updatingObjects = true
   var url = program.url ? program.url : defaultSource
-  downloadPDFFile(url, function() {
-    updater.updateSQLObjects(function() {
+  downloadPDFFile(url, function()
+  {
+    updater.updateSQLObjects(function()
+    {
       updatingObjects = false
     })
   })
@@ -58,7 +60,8 @@ function downloadPDFFile(url, completion)
     filename: "courses.pdf"
   }
 
-  download(url, options, function(err) {
+  download(url, options, function(err)
+  {
     if (err)
     {
       console.log(err)
@@ -72,10 +75,17 @@ function downloadPDFFile(url, completion)
 
 
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(require('cors')({url:"https://jacksonjude.github.io"}))
+app.use(express.urlencoded(
+{
+  extended: true
+}))
+app.use(require('cors')(
+{
+  url: "https://jacksonjude.github.io"
+}))
 
-app.get('/query/', function(req, res) {
+app.get('/query/', function(req, res)
+{
   if (!updatingObjects)
   {
     var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\'" + req.query.value + "\'" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
@@ -86,7 +96,8 @@ app.get('/query/', function(req, res) {
       console.log("GET /query/ => " + sqlString)
     }
 
-    require("./sql.js").query(sqlString, function (err, result) {
+    require("./sql.js").query(sqlString, function(err, result)
+    {
       res.json(result ? result.rows : [])
     })
   }
@@ -103,13 +114,16 @@ app.get('/query/', function(req, res) {
   }
 })
 
-app.get('/update/', function(req, res) {
+app.get('/update/', function(req, res)
+{
   if (!updatingObjects)
   {
     updatingObjects = true
 
-    downloadPDFFile((req.query.download ? req.query.download : defaultSource), function() {
-      updater.updateSQLObjects(function() {
+    downloadPDFFile((req.query.download ? req.query.download : defaultSource), function()
+    {
+      updater.updateSQLObjects(function()
+      {
         console.log("GET /update/ => OK")
         res.status(200).send("OK")
         updatingObjects = false
@@ -123,7 +137,8 @@ app.get('/update/', function(req, res) {
   }
 })
 
-app.post('/session/', function(req, res) {
+app.post('/session/', function(req, res)
+{
   if (!updatingObjects)
   {
     var reqBody = req.body
@@ -153,7 +168,8 @@ app.post('/session/', function(req, res) {
 
     sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
 
-    require("./sql.js").query(sqlString, function (err, result, fields) {
+    require("./sql.js").query(sqlString, function(err, result, fields)
+    {
       res.json(result ? result.rows : [])
     })
   }
@@ -164,7 +180,8 @@ app.post('/session/', function(req, res) {
   }
 })
 
-app.get('/ping/', function(req, res) {
+app.get('/ping/', function(req, res)
+{
   //console.log("GET /ping/ => 618")
   res.send("618")
 })
@@ -173,14 +190,16 @@ app.listen(PORT, () => console.log('App listening on port ' + PORT))
 
 var http = require("http")
 var pingSet = false
-var pingFunction = function() {
+var pingFunction = function()
+{
   pingSet = false
 
   http.get(process.env.HEROKU_URL + "/ping")
 
   console.log(Date.now())
 
-  require("./sql.js").query("select * from waketimes", function (err, result, fields) {
+  require("./sql.js").query("select * from waketimes", function(err, result, fields)
+  {
     if (result)
     {
       for (resultRow in result.rows)
