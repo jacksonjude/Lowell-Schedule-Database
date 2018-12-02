@@ -165,6 +165,20 @@ app.post('/session/', function(req, res)
     else if (reqBody.command == "share")
     {
       sqlString = "select shareuuid from sessions where id=\'" + reqBody.id + "\'"
+
+      if (program.info)
+      {
+        console.log("POST /session/?command=share => " + sqlString)
+      }
+    }
+    else if (reqBody.command == "loadShare")
+    {
+      sqlString = "select coursesjson, teachersjson, offblocksjson, filtersjson, favoriteschedulesjson, shareuuid from sessions where shareuuid=\'" + reqBody.shareUUID + "\'"
+
+      if (program.info)
+      {
+        console.log("POST /session/?command=loadShare => " + sqlString)
+      }
     }
     else
     {
