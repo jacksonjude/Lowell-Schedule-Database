@@ -19,6 +19,9 @@
     "pdfreader": "^0.2.5",
     "pg": "^7.4.3",
     "progress": "^2.0.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "tough-cookie": "^2.5.0",
     "uuid": "^3.3.2"
   }
 }

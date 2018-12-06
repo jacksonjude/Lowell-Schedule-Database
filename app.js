@@ -7,6 +7,8 @@ const PORT = process.env.PORT || 3009
 var updater = require("./updater.js")
 var updatingObjects = false
 
+var getSeatsForClass = require("./live-selection.js").getSeatsForClass
+
 var program = require('commander');
 program
   .version("0.1")
@@ -196,6 +198,22 @@ app.post('/session/', function(req, res)
   {
     console.log("POST /session/ => ERROR: Updating Objects!")
     res.status(500).send("ERROR: Updating Objects!")
+  }
+})
+
+app.get('/seats/', async function(req, res)
+{
+  if (req.query.courseName != null && req.query.teacherName != null && req.query.blockNumber != null & req.query.scheduleCode != null)
+  {
+    await getSeatsForClass(req.query.courseName, req.query.teacherName, req.query.blockNumber, req.query.scheduleCode, process.env.COURSE_SELECTION_AUTH).then(function(seatCount) {
+      res.send(seatCount)
+    }, function(err) {
+      res.send(err)
+    })
+  }
+  else
+  {
+    res.send("ERR: required request arguments not found")
   }
 })
 
