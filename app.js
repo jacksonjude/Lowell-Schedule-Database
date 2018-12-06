@@ -8,6 +8,7 @@ var updater = require("./updater.js")
 var updatingObjects = false
 
 var getSeatsForClass = require("./live-selection.js").getSeatsForClass
+var getArenaData = require("./live-selection.js").getArenaData
 
 var program = require('commander');
 program
