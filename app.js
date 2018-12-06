@@ -217,6 +217,14 @@ app.get('/seats/', async function(req, res)
   }
 })
 
+app.get("/arena/", async function(req, res) {
+  await getArenaData().then(function(data) {
+    res.send(data.slice(data.indexOf("<table>", data.indexOf("</table>"))))
+  }, function(err) {
+    res.send(err)
+  })
+})
+
 app.get('/ping/', function(req, res)
 {
   //console.log("GET /ping/ => 618")

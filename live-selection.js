@@ -60,3 +60,40 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
 
   return getSeatsPromse
 }
+
+exports.getArenaData = function() {
+  var getSeatsPromse = new Promise(function(resolve, reject) {
+    var liveSelectionData = fs.readFileSync('./live-selection.json', 'utf8')
+    if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000 && JSON.parse(liveSelectionData)["data"] != null)
+    {
+      var data = JSON.parse(liveSelectionData)["data"]
+      resolve(data)
+    }
+    else
+    {
+      let cookie = new tough.Cookie({
+         key: ".ASPXAUTH",
+         value: authCookie,
+         domain: "www.lowell-courseselection.org",
+         httpOnly: true,
+      })
+
+      var cookiejar = rp.jar()
+      cookiejar._jar.rejectPublicSuffixes = false
+      cookiejar.setCookie(cookie.toString(), 'http://www.lowell-courseselection.org')
+
+      var options = {
+         method: "GET",
+         uri: 'http://www.lowell-courseselection.org/',
+         jar: cookiejar,
+      }
+
+      rp(options).then(function(data) {
+        console.log("rp -- ")
+        fs.writeFileSync('./live-selection.json', JSON.stringify({"data":data, "updatedAt":Date.now()}))
+        resolve(data)
+      })
+    }
+  })
+
+}
