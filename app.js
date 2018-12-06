@@ -220,7 +220,7 @@ app.get('/seats/', async function(req, res)
 
 app.get("/arena/", async function(req, res) {
   await getArenaData(process.env.COURSE_SELECTION_AUTH).then(function(data) {
-    res.send(data.slice(data.indexOf("<table>", data.indexOf("</table>"))))
+    res.send(data.slice(data.indexOf("<table>"), data.indexOf("</table>")))
   }, function(err) {
     res.send(err)
   })
