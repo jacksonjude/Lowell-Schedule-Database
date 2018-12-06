@@ -18,7 +18,7 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
       else
       {
         console.log(data)
-        console.log(className)
+        console.log(courseRegex)
         console.log(matches)
         reject("ERR: RegExp error")
       }
