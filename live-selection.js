@@ -27,6 +27,7 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
     if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000)
     {
       var data = JSON.parse(liveSelectionData)["data"]
+      console.log(data)
 
       resolve(regexMatch(data, className, teacherName, blockNumber, scheduleCode))
     }
@@ -50,6 +51,7 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
       }
 
       rp(options).then(function(data) {
+        console.log(data)
         fs.writeFileSync('./live-selection.json', JSON.stringify({"data":data, "updatedAt":Date.now()}))
         resolve(regexMatch(data, className, teacherName, blockNumber, scheduleCode))
       })
