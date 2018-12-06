@@ -62,7 +62,7 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
 }
 
 exports.getArenaData = function(authCookie) {
-  var getSeatsPromse = new Promise(function(resolve, reject) {
+  var getArenaDataPromse = new Promise(function(resolve, reject) {
     var liveSelectionData = fs.readFileSync('./live-selection.json', 'utf8')
     if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000 && JSON.parse(liveSelectionData)["data"] != null)
     {
@@ -96,4 +96,5 @@ exports.getArenaData = function(authCookie) {
     }
   })
 
+  return getArenaDataPromse
 }
