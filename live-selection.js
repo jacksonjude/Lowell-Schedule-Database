@@ -24,7 +24,7 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
       }
     }
     var liveSelectionData = fs.readFileSync('./live-selection.json', 'utf8')
-    if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000)
+    if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000 && JSON.parse(liveSelectionData)["data"] != null)
     {
       var data = JSON.parse(liveSelectionData)["data"]
       console.log("parse -- " + data)
