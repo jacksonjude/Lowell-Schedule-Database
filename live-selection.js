@@ -64,7 +64,7 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
 exports.getArenaData = function(authCookie) {
   var getArenaDataPromse = new Promise(function(resolve, reject) {
     var liveSelectionData = fs.readFileSync('./live-selection.json', 'utf8')
-    if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000 && JSON.parse(liveSelectionData)["data"] != null)
+    if (false)//(liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000 && JSON.parse(liveSelectionData)["data"] != null)
     {
       var data = JSON.parse(liveSelectionData)["data"]
       resolve(data)
@@ -90,7 +90,7 @@ exports.getArenaData = function(authCookie) {
 
       rp(options).then(function(data) {
         console.log("rp -- ")
-        fs.writeFileSync('./live-selection.json', JSON.stringify({"data":data, "updatedAt":Date.now()}))
+        //fs.writeFileSync('./live-selection.json', JSON.stringify({"data":data, "updatedAt":Date.now()}))
         resolve(data)
       })
     }
