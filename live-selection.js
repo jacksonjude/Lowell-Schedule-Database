@@ -98,11 +98,14 @@ exports.getArenaData = function(authCookie) {
          jar: cookiejar,
       }*/
 
-      var options = {method: "GET", uri: courseSelectionURL}
-
-      rp(options).then(function(data) {
+      /*rp(options).then(function(data) {
         console.log("rp -- ")
         //fs.writeFileSync('./live-selection.json', JSON.stringify({"data":data, "updatedAt":Date.now()}))
+        writeCourseSelectionJSON(data)
+        resolve(data)
+      })*/
+
+      fs.readFile(courseSelectionURL, 'utf8', function(err, contents) {
         writeCourseSelectionJSON(data)
         resolve(data)
       })
