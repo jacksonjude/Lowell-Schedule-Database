@@ -105,7 +105,7 @@ exports.getArenaData = function(authCookie) {
         resolve(data)
       })*/
 
-      fs.readFile(courseSelectionURL, 'utf8', function(err, contents) {
+      fs.readFile(courseSelectionURL, 'utf8', function(err, data) {
         writeCourseSelectionJSON(data)
         resolve(data)
       })
