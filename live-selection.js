@@ -72,8 +72,10 @@ exports.getArenaData = function(authCookie) {
   var getArenaDataPromse = new Promise(function(resolve, reject) {
     //var liveSelectionData = fs.readFileSync('./live-selection.json', 'utf8')
     var liveSelectionData = getCourseSelectionJSON()
-    if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] > 180000 && JSON.parse(liveSelectionData)["data"] != null)
+    if (liveSelectionData != null && Date.now()-JSON.parse(liveSelectionData)["updatedAt"] < 180000 && JSON.parse(liveSelectionData)["data"] != null)
     {
+      console.log("parse -- " + liveSelectionData + " -- " + Date.now()-JSON.parse(liveSelectionData)["updatedAt"])
+
       var data = JSON.parse(liveSelectionData)["data"]
       resolve(data)
     }
