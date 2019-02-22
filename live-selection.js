@@ -81,7 +81,7 @@ exports.getArenaData = function(authCookie) {
     }
     else
     {
-      let cookie = new tough.Cookie({
+      /*let cookie = new tough.Cookie({
          key: ".ASPXAUTH",
          value: authCookie,
          domain: courseSelectionURL,
@@ -96,7 +96,9 @@ exports.getArenaData = function(authCookie) {
          method: "GET",
          uri: courseSelectionURL,
          jar: cookiejar,
-      }
+      }*/
+
+      var options = {method: "GET", uri: courseSelectionURL}
 
       rp(options).then(function(data) {
         console.log("rp -- ")
