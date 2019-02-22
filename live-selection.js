@@ -8,7 +8,7 @@ const tough = require('tough-cookie');
 const courseSelectionURL = "pdf/lowellcourseselection.html"
 //const courseSelectionURL = "www.lowell-courseselection.org"
 
-var currentSelectionData = "{}"
+var currentSelectionData = '{"updatedAt":0}'
 
 exports.getSeatsForClass = function(className, teacherName, blockNumber, scheduleCode, authCookie) {
   var getSeatsPromse = new Promise(function(resolve, reject) {
