@@ -144,9 +144,9 @@ function getObjectsFromRawText(rawText)
       }
     }
 
-    if (tmpArray.length == 9)
+    if (tmpArray.length == 7)
     {
-      var newBlock = new SchoolBlock(tmpArray[3].trim(), tmpArray[5].trim(), tmpArray[6].trim(), singleSpace(tmpArray[7]), singleSpace(tmpArray[8]), tmpArray[1].trim())
+      var newBlock = new SchoolBlock(tmpArray[3].trim(), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim())
 
       blocks.push(newBlock)
 
