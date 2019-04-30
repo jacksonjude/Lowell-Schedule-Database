@@ -45,14 +45,14 @@ if (program.download)
 function updateObjects()
 {
   updatingObjects = true
-  var url = program.url ? program.url : defaultSource
+  /*var url = program.url ? program.url : defaultSource
   downloadPDFFile(url, function()
-  {
+  {*/
     updater.updateSQLObjects(function()
     {
       updatingObjects = false
     })
-  })
+  //})
 }
 
 function downloadPDFFile(url, completion)
