@@ -124,15 +124,15 @@ app.get('/update/', function(req, res)
   {
     updatingObjects = true
 
-    downloadPDFFile((req.query.download ? req.query.download : defaultSource), function()
-    {
+    //downloadPDFFile((req.query.download ? req.query.download : defaultSource), function()
+    //{
       updater.updateSQLObjects(function()
       {
         console.log("GET /update/ => OK")
         res.status(200).send("OK")
         updatingObjects = false
       })
-    })
+    //})
   }
   else
   {
