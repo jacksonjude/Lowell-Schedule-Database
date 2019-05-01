@@ -42,8 +42,8 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
       let cookie = new tough.Cookie({
          key: ".ASPXAUTH",
          value: authCookie,
-         domain: courseSelectionURL,
-         httpOnly: true,
+         domain: courseSelectionURL//,
+         //httpOnly: true,
       })
 
       var cookiejar = rp.jar()
