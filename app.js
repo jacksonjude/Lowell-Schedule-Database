@@ -243,7 +243,7 @@ var pingFunction = function()
 {
   pingSet = false
 
-  http.get(process.env.HEROKU_URL + "/ping")
+  //http.get(process.env.HEROKU_URL + "/ping")
 
   console.log(Date.now())
 

@@ -148,7 +148,14 @@ function getObjectsFromRawText(rawText)
     {
       var newBlock = new SchoolBlock(tmpArray[3].trim(), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim())
 
+      console.log(tmpArray)
+
       blocks.push(newBlock)
+
+      if (tmpArray[3].trim() == "0271")
+        departmentNumber = "2"
+      if (tmpArray[3].trim() == "0272")
+        departmentNumber = "1"
 
       tmpArray = []
     }
