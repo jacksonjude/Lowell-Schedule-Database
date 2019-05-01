@@ -144,15 +144,15 @@ function getObjectsFromRawText(rawText)
       }
     }
 
-    if (tmpArray.length == 7)
+    if (tmpArray.length == 7) //UPDATE - # of columns
     {
-      var newBlock = new SchoolBlock(tmpArray[3].trim(), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim())
+      var newBlock = new SchoolBlock(tmpArray[3].trim(), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim()) //UPDATE - Data from columns into block object
 
       console.log(tmpArray)
 
       blocks.push(newBlock)
 
-      if (tmpArray[3].trim() == "0271")
+      if (tmpArray[3].trim() == "0271") //UPDATE - Special exceptions
         departmentNumber = "2"
       if (tmpArray[3].trim() == "0272")
         departmentNumber = "1"
