@@ -6,7 +6,7 @@ const rp = require('request-promise');
 const tough = require('tough-cookie');
 
 //const courseSelectionURL = "./pdf/lowellcourseselection.html"
-const courseSelectionURL = "http://www.lowell-courseselection.org"
+const courseSelectionURL = "www.lowell-courseselection.org"
 
 var currentSelectionData = '{"updatedAt":0}'
 
@@ -42,17 +42,17 @@ exports.getSeatsForClass = function(className, teacherName, blockNumber, schedul
       let cookie = new tough.Cookie({
          key: ".ASPXAUTH",
          value: authCookie,
-         domain: courseSelectionURL//,
-         //httpOnly: true,
+         domain: courseSelectionURL,
+         httpOnly: true,
       })
 
       var cookiejar = rp.jar()
       cookiejar._jar.rejectPublicSuffixes = false
-      cookiejar.setCookie(cookie.toString(), courseSelectionURL)
+      cookiejar.setCookie(cookie.toString(), "http://" + courseSelectionURL)
 
       var options = {
          method: "GET",
-         uri: courseSelectionURL,
+         uri: "http://" + courseSelectionURL,
          jar: cookiejar,
       }
 
