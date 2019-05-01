@@ -6,7 +6,7 @@ const rp = require('request-promise');
 const tough = require('tough-cookie');
 
 //const courseSelectionURL = "./pdf/lowellcourseselection.html"
-const courseSelectionURL = "www.lowell-courseselection.org"
+const courseSelectionURL = "http://www.lowell-courseselection.org"
 
 var currentSelectionData = '{"updatedAt":0}'
 
