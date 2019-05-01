@@ -5,8 +5,8 @@ const fs = require('fs');
 const rp = require('request-promise');
 const tough = require('tough-cookie');
 
-const courseSelectionURL = "./pdf/lowellcourseselection.html"
-//const courseSelectionURL = "www.lowell-courseselection.org"
+//const courseSelectionURL = "./pdf/lowellcourseselection.html"
+const courseSelectionURL = "www.lowell-courseselection.org"
 
 var currentSelectionData = '{"updatedAt":0}'
 
@@ -81,7 +81,7 @@ exports.getArenaData = function(authCookie) {
     }
     else
     {
-      /*let cookie = new tough.Cookie({
+      let cookie = new tough.Cookie({
          key: ".ASPXAUTH",
          value: authCookie,
          domain: courseSelectionURL,
@@ -96,19 +96,19 @@ exports.getArenaData = function(authCookie) {
          method: "GET",
          uri: courseSelectionURL,
          jar: cookiejar,
-      }*/
+      }
 
-      /*rp(options).then(function(data) {
+      rp(options).then(function(data) {
         console.log("rp -- ")
         //fs.writeFileSync('./live-selection.json', JSON.stringify({"data":data, "updatedAt":Date.now()}))
         writeCourseSelectionJSON(data)
         resolve(data)
-      })*/
+      })
 
-      fs.readFile(courseSelectionURL, 'utf8', function(err, data) {
+      /*fs.readFile(courseSelectionURL, 'utf8', function(err, data) {
         writeCourseSelectionJSON(data)
         resolve(data)
-      })
+      })*/
     }
   })
 
