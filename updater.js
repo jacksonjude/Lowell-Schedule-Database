@@ -146,22 +146,73 @@ function getObjectsFromRawText(rawText)
 
     if (tmpArray.length == 7) //UPDATE - # of columns
     {
-      var newBlock = new SchoolBlock(tmpArray[3].trim(), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim()) //UPDATE - Data from columns into block object
+      var blockCode = null
+      var roomNumber = singleSpace(tmpArray[5])
+      var blockNumber = tmpArray[4].trim()
+      var teacherName = singleSpace(tmpArray[6])
+      var courseCode = tmpArray[1].trim()
+      var sectionNumber = tmpArray[3]
+
+      //var newBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim()) //UPDATE - Data from columns into block object
+      var newSchoolBlock = new SchoolBlock(sectionNumber, blockCode, blockNumber, roomNumber, teacherName, courseCode)
 
       console.log(tmpArray)
 
       blocks.push(newBlock)
 
-      if (tmpArray[3].trim() == "0271") //UPDATE - Special exceptions
+      if (sectionNumber == "80") //UPDATE - Special exceptions
+        departmentNumber = "8"
+      if (sectionNumber == "87")
         departmentNumber = "2"
-      if (tmpArray[3].trim() == "0272")
-        departmentNumber = "1"
+
+      if (sectionNumber == "594")
+        departmentNumber = "7"
 
       tmpArray = []
     }
   }
 
   console.log("   Created Objects!")
+
+  return [courses, blocks]
+}
+
+function getObjectsFromCourseSelection()
+{
+  var objectsPromise = new Promise(async function(resolve, reject)
+  {
+    var arenaData = await require("./live-selection.js").getArenaData("4E96B90BA4FB2B4D544BE1543075D248D2605EEFBC0D1B35B8E7DC8331419C19877EC9317305BB5408053AC02FABB07E85CB7ACC637A63AD12BC7169C9448B19AF160C739D69B6A109AFFDEBD6119621D3749F5C9D40FCD003105B80BE20B70A2262C8DF72E5FA6ABD0002C92B649DCBC689B82D8FE8D6505C04DF3F96ED41544F63E88B16289286F9D78306BD0D6D40").then(function(data) {
+      resolve(getObjectsFromTable(arenaData))
+    })
+  })
+
+  return objectsPromise
+}
+
+function getObjectsFromTable(arenaData)
+{
+  var blocks = []
+  var courses = []
+  var departmentNum = 1
+  var lastBlockNumber = 0
+
+  for (rowNum in arenaData)
+  {
+    var blockCode = arenaData[rowNum][3]
+    var blockNumber = arenaData[rowNum][2]
+    var teacherName = arenaData[rowNum][1]
+    var courseName = arenaData[rowNum][0]
+
+    if (lastBlockNumber > 1 && blockNumber == 1)
+      departmentNum++
+    lastBlockNumber = blockNumber
+
+    var newSchoolBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), blockCode, blockNumber, null, teacherName, courseName)
+    var newSchoolCouse = new SchoolCourse(departmentNum, courseName, courseName)
+
+    blocks.push(newSchoolBlock)
+    courses.push(newSchoolCouse)
+  }
 
   return [courses, blocks]
 }
@@ -195,9 +246,9 @@ async function loadObjectsToSQL(courses, blocks, completion)
   completion()
 }
 
-var updateSQLObjects = function(completion)
+var updateSQLObjects = function(completion, objectFunction)
 {
-  var objectsPromise = getObjectsFromPDF()
+  var objectsPromise = objectFunction()
   objectsPromise.then(value =>
   {
     var courses = value[0]
@@ -218,3 +269,5 @@ var updateSQLObjects = function(completion)
 }
 
 exports.updateSQLObjects = updateSQLObjects
+exports.getObjectsFromCourseSelection = getObjectsFromCourseSelection
+exports.getObjectsFromPDF = getObjectsFromPDF

@@ -137,9 +137,16 @@ exports.getArenaData = function(authCookie) {
     rp(options)
       .then(function($) {
         cheerioTableparser($);
-        var table = $("table").parsetable();
-        var newData = table[0].map((col, i) => table.map(row => row[i]));
-        resolve(newData)
+        var table = $("table").parsetable()
+        if (table[0] != null)
+        {
+          var newData = table[0].map((col, i) => table.map(row => row[i]))
+          resolve(newData)
+        }
+        else
+        {
+          resolve(null)
+        }
       })
   })
 

@@ -37,7 +37,7 @@ function writeSettings(array)
   fs.writeFileSync('./settings.json', JSON.stringify(array))
 }
 
-if (program.download)
+/*if (program.download)
 {
   updateObjects()
 }
@@ -45,15 +45,15 @@ if (program.download)
 function updateObjects()
 {
   updatingObjects = true
-  /*var url = program.url ? program.url : defaultSource
+  var url = program.url ? program.url : defaultSource
   downloadPDFFile(url, function()
-  {*/
+  {
     updater.updateSQLObjects(function()
     {
       updatingObjects = false
-    })
-  //})
-}
+    }, updater.getObjectsFromCourseSelection)
+  })
+}*/
 
 function downloadPDFFile(url, completion)
 {
@@ -131,7 +131,7 @@ app.get('/update/', function(req, res)
         console.log("GET /update/ => OK")
         res.status(200).send("OK")
         updatingObjects = false
-      })
+      }, updater.getObjectsFromPDF)
     //})
   }
   else
@@ -243,7 +243,7 @@ var pingFunction = function()
 {
   pingSet = false
 
-  http.get(process.env.HEROKU_URL + "/ping")
+  //http.get(process.env.HEROKU_URL + "/ping")
 
   console.log(Date.now())
 
