@@ -154,9 +154,9 @@ function getObjectsFromRawText(rawText)
       var sectionNumber = tmpArray[3]
 
       //var newBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim()) //UPDATE - Data from columns into block object
-      var newSchoolBlock = new SchoolBlock(sectionNumber, blockCode, blockNumber, roomNumber, teacherName, courseCode)
+      var newBlock = new SchoolBlock(sectionNumber, blockCode, blockNumber, roomNumber, teacherName, courseCode)
 
-      console.log(tmpArray)
+      //console.log(tmpArray)
 
       blocks.push(newBlock)
 
