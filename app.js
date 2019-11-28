@@ -85,7 +85,7 @@ app.use(express.urlencoded(
 }))
 app.use(require('cors')(
 {
-  url: "https://jacksonjude.github.io"
+  url: "*"
 }))
 
 app.get('/query/', function(req, res)
