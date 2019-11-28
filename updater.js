@@ -151,22 +151,18 @@ function getObjectsFromRawText(rawText)
       var blockNumber = tmpArray[4].trim()
       var teacherName = singleSpace(tmpArray[6])
       var courseCode = tmpArray[1].trim()
-      var sectionNumber = tmpArray[3]
+      var courseName = tmpArray[2].trim()
 
-      //var newBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), null, tmpArray[4].trim(), singleSpace(tmpArray[5]), singleSpace(tmpArray[6]), tmpArray[1].trim()) //UPDATE - Data from columns into block object
-      var newBlock = new SchoolBlock(sectionNumber, blockCode, blockNumber, roomNumber, teacherName, courseCode)
+      var newBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), null, blockNumber, roomNumber, teacherName, courseCode) //UPDATE - Data from columns into block object
+      //var newBlock = new SchoolBlock(sectionNumber, blockCode, blockNumber, roomNumber, teacherName, courseCode)
 
       //console.log(tmpArray)
 
       blocks.push(newBlock)
 
-      if (sectionNumber == "80") //UPDATE - Special exceptions
+      /*if (sectionNumber == "80") //UPDATE - Special exceptions
         departmentNumber = "8"
-      if (sectionNumber == "87")
-        departmentNumber = "2"
-
-      if (sectionNumber == "594")
-        departmentNumber = "7"
+      */
 
       tmpArray = []
     }
