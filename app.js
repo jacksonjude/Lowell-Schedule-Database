@@ -37,7 +37,7 @@ function writeSettings(array)
   fs.writeFileSync('./settings.json', JSON.stringify(array))
 }
 
-if (program.download)
+/*if (program.download)
 {
   updateObjects()
 }
@@ -51,9 +51,9 @@ function updateObjects()
     updater.updateSQLObjects(function()
     {
       updatingObjects = false
-    })
+    }, updater.getObjectsFromCourseSelection)
   })
-}
+}*/
 
 function downloadPDFFile(url, completion)
 {
@@ -85,7 +85,7 @@ app.use(express.urlencoded(
 }))
 app.use(require('cors')(
 {
-  url: "https://jacksonjude.github.io"
+  url: "*"
 }))
 
 app.get('/query/', function(req, res)
@@ -124,15 +124,15 @@ app.get('/update/', function(req, res)
   {
     updatingObjects = true
 
-    downloadPDFFile((req.query.download ? req.query.download : defaultSource), function()
-    {
+    //downloadPDFFile((req.query.download ? req.query.download : defaultSource), function()
+    //{
       updater.updateSQLObjects(function()
       {
         console.log("GET /update/ => OK")
         res.status(200).send("OK")
         updatingObjects = false
-      })
-    })
+      }, updater.getObjectsFromPDF)
+    //})
   }
   else
   {
@@ -220,9 +220,11 @@ app.get('/seats/', async function(req, res)
 
 app.get("/arena/", async function(req, res) {
   await getArenaData(process.env.COURSE_SELECTION_AUTH).then(function(data) {
-    var slicedData = data.slice(data.indexOf("<table"), data.indexOf("</table>"))
-    res.send(slicedData)
+    //var slicedData = data.slice(data.indexOf("<table"), data.indexOf("</table>"))
+    //console.log("data -- " + data)
+    res.send(data)
   }, function(err) {
+    console.log("error -- " + err)
     res.send(err)
   })
 })
@@ -241,7 +243,7 @@ var pingFunction = function()
 {
   pingSet = false
 
-  http.get(process.env.HEROKU_URL + "/ping")
+  //http.get(process.env.HEROKU_URL + "/ping")
 
   console.log(Date.now())
 

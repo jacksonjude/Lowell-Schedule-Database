@@ -14,7 +14,7 @@ var barEnabled = false
 
 function startIndexTest(rawText, text)
 {
-  return (rawText[text] == "1" && text != 1)
+  return (rawText[text] == "1" && text != 1) //Testing if text item is startIndex, checking if text is departmentNum == "1" (since Math, dep #1, is first)
 }
 
 function getObjectsFromPDF()
@@ -62,6 +62,7 @@ function getObjectsFromRawText(rawText)
   var courses = []
   var blocks = []
 
+  // Finding startIndex (where to actually start counting after first row header on each page)
   var startIndex = null
 
   for (text in rawText)
@@ -93,10 +94,10 @@ function getObjectsFromRawText(rawText)
     if (barEnabled)
       bar.tick()
 
-    if (rawText[text] == rawText[0])
+    if (rawText[text] == rawText[0]) //If start of new page (and new header),
     {
       tmpArray = []
-      skipsLeft = startIndex
+      skipsLeft = startIndex //Then skip until header is passed (skips = startIndex since headers are all the same)
     }
 
     if (skipsLeft > 0)
@@ -105,7 +106,7 @@ function getObjectsFromRawText(rawText)
       continue
     }
 
-    if (tmpArray.length == 0 && parseInt(rawText[text]) != parseInt(departmentNumber) && parseInt(rawText[text]) - 1 != parseInt(departmentNumber))
+    if (tmpArray.length == 0 && parseInt(rawText[text]) != parseInt(departmentNumber) && parseInt(rawText[text]) - 1 != parseInt(departmentNumber)) //If department number mismatch (currentDepNum = parseInt(rawText[text]), prevDepNum = parseInt(departmentNumber), if currentDepNum != prevDepNum && currentDepNum-1 != prevDepNum)
     {
       if (!startedSkipping)
       {
@@ -113,18 +114,18 @@ function getObjectsFromRawText(rawText)
         courses.pop()
         blocks.pop()
       }
-      continue
+      continue //Will skip until currentDepNum - 1 == prevDepNum
     }
     else if (tmpArray.length == 0 && parseInt(rawText[text]) - 1 == parseInt(departmentNumber) && rawText[text].length == 1)
     {
-      departmentNumber = rawText[text]
+      departmentNumber = rawText[text] //Set new prevDepNum = currentDepNum
     }
 
     startedSkipping = false
 
-    tmpArray.push(rawText[text])
+    tmpArray.push(rawText[text]) //Push to tmpArray => SchoolCourse/SchoolBlock
 
-    if (tmpArray.length == 3)
+    if (tmpArray.length == 3) //Requires that document be ordered dep num, course code, course name
     {
       var newCourse = new SchoolCourse(tmpArray[0].trim(), tmpArray[1].trim(), singleSpace(tmpArray[2]))
 
@@ -140,21 +141,76 @@ function getObjectsFromRawText(rawText)
 
       if (!courseExists)
       {
-        courses.push(newCourse)
+        courses.push(newCourse) //Only add course if it already doesn't exist
       }
     }
 
-    if (tmpArray.length == 9)
+    if (tmpArray.length == 6) //UPDATE - # of columns
     {
-      var newBlock = new SchoolBlock(tmpArray[3].trim(), tmpArray[5].trim(), tmpArray[6].trim(), singleSpace(tmpArray[7]), singleSpace(tmpArray[8]), tmpArray[1].trim())
+      var blockCode = null
+      var roomNumber = singleSpace(tmpArray[4])
+      var blockNumber = tmpArray[3].trim()
+      var teacherName = singleSpace(tmpArray[5])
+      var courseCode = tmpArray[1].trim()
+      var courseName = tmpArray[2].trim()
+
+      //Section Number used to be a unique number for each SchoolBlock. Now we are just generating section number using SHA256(courseName + teacherName + blockNumber), which will give a unique string
+      var newBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), null, blockNumber, roomNumber, teacherName, courseCode) //UPDATE - Data from columns into block object
+      //var newBlock = new SchoolBlock(sectionNumber, blockCode, blockNumber, roomNumber, teacherName, courseCode)
+
+      //console.log(tmpArray)
 
       blocks.push(newBlock)
+
+      /*if (sectionNumber == "80") //UPDATE - Special exceptions
+        departmentNumber = "8"
+      */
 
       tmpArray = []
     }
   }
 
   console.log("   Created Objects!")
+
+  return [courses, blocks]
+}
+
+function getObjectsFromCourseSelection()
+{
+  var objectsPromise = new Promise(async function(resolve, reject)
+  {
+    var arenaData = await require("./live-selection.js").getArenaData("4E96B90BA4FB2B4D544BE1543075D248D2605EEFBC0D1B35B8E7DC8331419C19877EC9317305BB5408053AC02FABB07E85CB7ACC637A63AD12BC7169C9448B19AF160C739D69B6A109AFFDEBD6119621D3749F5C9D40FCD003105B80BE20B70A2262C8DF72E5FA6ABD0002C92B649DCBC689B82D8FE8D6505C04DF3F96ED41544F63E88B16289286F9D78306BD0D6D40").then(function(data) {
+      resolve(getObjectsFromTable(arenaData))
+    })
+  })
+
+  return objectsPromise
+}
+
+function getObjectsFromTable(arenaData) //Fetching SchoolBlocks and SchoolCourses from old arena site (NIU)
+{
+  var blocks = []
+  var courses = []
+  var departmentNum = 1
+  var lastBlockNumber = 0
+
+  for (rowNum in arenaData)
+  {
+    var blockCode = arenaData[rowNum][3]
+    var blockNumber = arenaData[rowNum][2]
+    var teacherName = arenaData[rowNum][1]
+    var courseName = arenaData[rowNum][0]
+
+    if (lastBlockNumber > 1 && blockNumber == 1)
+      departmentNum++
+    lastBlockNumber = blockNumber
+
+    var newSchoolBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), blockCode, blockNumber, null, teacherName, courseName)
+    var newSchoolCouse = new SchoolCourse(departmentNum, courseName, courseName)
+
+    blocks.push(newSchoolBlock)
+    courses.push(newSchoolCouse)
+  }
 
   return [courses, blocks]
 }
@@ -188,9 +244,9 @@ async function loadObjectsToSQL(courses, blocks, completion)
   completion()
 }
 
-var updateSQLObjects = function(completion)
+var updateSQLObjects = function(completion, objectFunction)
 {
-  var objectsPromise = getObjectsFromPDF()
+  var objectsPromise = objectFunction()
   objectsPromise.then(value =>
   {
     var courses = value[0]
@@ -211,3 +267,5 @@ var updateSQLObjects = function(completion)
 }
 
 exports.updateSQLObjects = updateSQLObjects
+exports.getObjectsFromCourseSelection = getObjectsFromCourseSelection
+exports.getObjectsFromPDF = getObjectsFromPDF
