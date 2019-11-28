@@ -144,12 +144,12 @@ function getObjectsFromRawText(rawText)
       }
     }
 
-    if (tmpArray.length == 7) //UPDATE - # of columns
+    if (tmpArray.length == 6) //UPDATE - # of columns
     {
       var blockCode = null
-      var roomNumber = singleSpace(tmpArray[5])
-      var blockNumber = tmpArray[4].trim()
-      var teacherName = singleSpace(tmpArray[6])
+      var roomNumber = singleSpace(tmpArray[4])
+      var blockNumber = tmpArray[3].trim()
+      var teacherName = singleSpace(tmpArray[5])
       var courseCode = tmpArray[1].trim()
       var courseName = tmpArray[2].trim()
 
