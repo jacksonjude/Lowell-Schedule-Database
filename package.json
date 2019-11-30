@@ -4,7 +4,7 @@
   "description": "a pdf reader",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js --info",
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,12 +12,9 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "cheerio-tableparser": "^1.0.1",
-    "commander": "^2.16.0",
     "cors": "^2.8.4",
-    "download-file": "^0.1.5",
     "express": "^4.16.2",
     "http": "0.0.0",
-    "mysql": "^2.16.0",
     "pdfreader": "^0.2.5",
     "pg": "^7.4.3",
     "progress": "^2.0.0",

@@ -19,6 +19,8 @@ exports.query = function(sql, callback)
     clearTimeout(disconnectTimer)
   }
 
+  var sql = sql.split(";")[0] ? sql.split(";")[0] : sql
+
   connection.query(sql, function(err, results)
   {
     callback(err, results)
