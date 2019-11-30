@@ -10,73 +10,7 @@ var updatingObjects = false
 var getSeatsForClass = require("./live-selection.js").getSeatsForClass
 var getArenaData = require("./live-selection.js").getArenaData
 
-var program = require('commander');
-program
-  .version("0.1")
-  .option('-d, --download', 'Download and Update Data')
-  .option('-u, --url [url]', 'Set URL')
-  .option('-i, --info', 'Info Console Output')
-  .parse(process.argv);
-
-if (program.url)
-{
-  var settings = getSettings()
-  settings["defaultSourceURL"] = program.url
-  writeSettings(settings)
-}
-
-const defaultSource = getSettings()["defaultSourceURL"]
-
-function getSettings()
-{
-  return JSON.parse(fs.readFileSync('./settings.json', 'utf8'))
-}
-
-function writeSettings(array)
-{
-  fs.writeFileSync('./settings.json', JSON.stringify(array))
-}
-
-/*if (program.download)
-{
-  updateObjects()
-}
-
-function updateObjects()
-{
-  updatingObjects = true
-  var url = program.url ? program.url : defaultSource
-  downloadPDFFile(url, function()
-  {
-    updater.updateSQLObjects(function()
-    {
-      updatingObjects = false
-    }, updater.getObjectsFromCourseSelection)
-  })
-}*/
-
-function downloadPDFFile(url, completion)
-{
-  console.log("Downloading From " + url)
-  var download = require('download-file')
-  var options = {
-    directory: "./",
-    filename: "courses.pdf"
-  }
-
-  download(url, options, function(err)
-  {
-    if (err)
-    {
-      console.log(err)
-      updatingObjects = false
-      return
-    }
-    console.log("Downloaded File!")
-    completion()
-  })
-}
-
+var sql = require("./sql.js")
 
 app.use(express.json())
 app.use(express.urlencoded(
@@ -90,116 +24,108 @@ app.use(require('cors')(
 
 app.get('/query/', function(req, res)
 {
-  if (!updatingObjects)
+  if (updatingObjects)
   {
-    var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\'" + req.query.value + "\'" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
-    sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
-
-    if (program.info)
-    {
-      console.log("GET /query/ => " + sqlString)
-    }
-
-    require("./sql.js").query(sqlString, function(err, result)
-    {
-      res.json(result ? result.rows : [])
-    })
-  }
-  else
-  {
-    console.log("GET /query/ => ERROR: Updating Objects!")
-    res.status(500).send("ERROR: Updating Objects!")
+    console.log("GET /query/ => ERROR: Updating Objects")
+    res.send("ERROR: Updating Objects")
+    return
   }
 
-  if (!pingSet)
+  var sqlString = "select " + (req.query.distinct ? "distinct " : "") + (req.query.column ? req.query.column : "*") + " from " + req.query.table + ((req.query.key != null && req.query.value != null) ? " where " + req.query.key + "=\'" + req.query.value + "\'" : "") + (req.query.where ? " where " + req.query.where : "") + (req.query.group ? " group by " + req.query.group : "") + (req.query.order ? " order by " + req.query.order : "")
+
+  if (process.env.INFO == "true")
   {
-    pingSet = true
-    setTimeout(pingFunction, process.env.PING_INTERVAL)
+    console.log("GET /query/ => " + sqlString)
   }
+
+  sql.query(sqlString, function(err, result)
+  {
+    res.json(result ? result.rows : [])
+  })
 })
 
 app.get('/update/', function(req, res)
 {
-  if (!updatingObjects)
+  if (process.env.UPDATES_ENABLED != 'true')
   {
-    updatingObjects = true
+    console.log("GET /update/ => ERROR: Updates not enabled")
+    res.send("ERROR: Updates not enabled")
+    return
+  }
 
-    //downloadPDFFile((req.query.download ? req.query.download : defaultSource), function()
-    //{
-      updater.updateSQLObjects(function()
-      {
-        console.log("GET /update/ => OK")
-        res.status(200).send("OK")
-        updatingObjects = false
-      }, updater.getObjectsFromPDF)
-    //})
-  }
-  else
+  if (updatingObjects)
   {
-    console.log("GET /update/ => ERROR: Already Updating Objects!")
-    res.status(500).send("ERROR: Already Updating Objects!")
+    console.log("GET /update/ => ERROR: Already Updating Objects")
+    res.send("ERROR: Already Updating Objects")
+    return
   }
+
+  updatingObjects = true
+
+  updater.updateSQLObjects(function()
+  {
+    console.log("GET /update/ => OK")
+    res.send("OK")
+    updatingObjects = false
+  }, updater.getObjectsFromPDF)
 })
 
 app.post('/session/', function(req, res)
 {
-  if (!updatingObjects)
+  if (updatingObjects)
   {
-    var reqBody = req.body
+    console.log("POST /session/ => ERROR: Updating Objects")
+    res.send("ERROR: Updating Objects")
+    return
+  }
 
-    if (reqBody.command == "save")
+  var reqBody = req.body
+
+  if (reqBody.command == "save")
+  {
+    sqlString = "insert into sessions values (\'" + reqBody.id + "\', \'" + reqBody.coursesJSON + "\', \'" + reqBody.teachersJSON + "\', \'" + reqBody.offBlocksJSON + "\', \'" + reqBody.filtersJSON + "\', \'" + reqBody.favoriteSchedulesJSON + "\', \'" + uuidv4() + "\')" + " on conflict (id) do update set coursesJSON=\'" + reqBody.coursesJSON + "\', teachersJSON=\'" + reqBody.teachersJSON + "\', offBlocksJSON=\'" + reqBody.offBlocksJSON + "\', filtersJSON=\'" + reqBody.filtersJSON + "\', favoriteSchedulesJSON=\'" + reqBody.favoriteSchedulesJSON + "\'"
+
+    if (process.env.INFO == "true")
     {
-      sqlString = "insert into sessions values (\'" + reqBody.id + "\', \'" + reqBody.coursesJSON + "\', \'" + reqBody.teachersJSON + "\', \'" + reqBody.offBlocksJSON + "\', \'" + reqBody.filtersJSON + "\', \'" + reqBody.favoriteSchedulesJSON + "\', \'" + uuidv4() + "\')" + " on conflict (id) do update set coursesJSON=\'" + reqBody.coursesJSON + "\', teachersJSON=\'" + reqBody.teachersJSON + "\', offBlocksJSON=\'" + reqBody.offBlocksJSON + "\', filtersJSON=\'" + reqBody.filtersJSON + "\', favoriteSchedulesJSON=\'" + reqBody.favoriteSchedulesJSON + "\'"
-
-      if (program.info)
-      {
-        console.log("POST /session/?command=save => " + sqlString)
-      }
+      console.log("POST /session/?command=save => " + sqlString)
     }
-    else if (reqBody.command == "load")
-    {
-      sqlString = "select * from sessions where id=\'" + reqBody.id + "\'"
+  }
+  else if (reqBody.command == "load")
+  {
+    sqlString = "select * from sessions where id=\'" + reqBody.id + "\'"
 
-      if (program.info)
-      {
-        console.log("POST /session/?command=load => " + sqlString)
-      }
+    if (process.env.INFO == "true")
+    {
+      console.log("POST /session/?command=load => " + sqlString)
     }
-    else if (reqBody.command == "share")
-    {
-      sqlString = "select shareuuid from sessions where id=\'" + reqBody.id + "\'"
+  }
+  else if (reqBody.command == "share")
+  {
+    sqlString = "select shareuuid from sessions where id=\'" + reqBody.id + "\'"
 
-      if (program.info)
-      {
-        console.log("POST /session/?command=share => " + sqlString)
-      }
+    if (process.env.INFO == "true")
+    {
+      console.log("POST /session/?command=share => " + sqlString)
     }
-    else if (reqBody.command == "loadShare")
-    {
-      sqlString = "select coursesjson, teachersjson, offblocksjson, filtersjson, favoriteschedulesjson, shareuuid from sessions where shareuuid=\'" + reqBody.shareUUID + "\'"
+  }
+  else if (reqBody.command == "loadShare")
+  {
+    sqlString = "select coursesjson, teachersjson, offblocksjson, filtersjson, favoriteschedulesjson, shareuuid from sessions where shareuuid=\'" + reqBody.shareUUID + "\'"
 
-      if (program.info)
-      {
-        console.log("POST /session/?command=loadShare => " + sqlString)
-      }
+    if (process.env.INFO == "true")
+    {
+      console.log("POST /session/?command=loadShare => " + sqlString)
     }
-    else
-    {
-      console.log("POST /session/?command=" + reqBody.command + " => ERROR: Command Does Not Exist")
-    }
-
-    sqlString = sqlString.split(";")[0] ? sqlString.split(";")[0] : sqlString
-
-    require("./sql.js").query(sqlString, function(err, result, fields)
-    {
-      res.json(result ? result.rows : [])
-    })
   }
   else
   {
-    console.log("POST /session/ => ERROR: Updating Objects!")
-    res.status(500).send("ERROR: Updating Objects!")
+    console.log("POST /session/?command=" + reqBody.command + " => ERROR: Command Does Not Exist")
   }
+
+  sql.query(sqlString, function(err, result, fields)
+  {
+    res.json(result ? result.rows : [])
+  })
 })
 
 app.get('/seats/', async function(req, res)
@@ -214,7 +140,7 @@ app.get('/seats/', async function(req, res)
   }
   else
   {
-    res.send("ERR: required request arguments not found")
+    res.send("ERROR: Required request arguments not found")
   }
 })
 
@@ -224,7 +150,7 @@ app.get("/arena/", async function(req, res) {
     //console.log("data -- " + data)
     res.send(data)
   }, function(err) {
-    console.log("error -- " + err)
+    console.log("ERROR: " + err)
     res.send(err)
   })
 })
@@ -235,6 +161,25 @@ app.get('/ping/', function(req, res)
   res.send("618")
 })
 
+app.get('/pingstart', function(req, res)
+{
+  if (process.env.INFO == "true")
+  {
+    console.log("GET /pingstart/")
+  }
+
+  if (!pingSet)
+  {
+    pingSet = true
+    setTimeout(pingFunction, process.env.PING_INTERVAL)
+    res.send("Ping set")
+  }
+  else
+  {
+    res.send("Ping already set")
+  }
+})
+
 app.listen(PORT, () => console.log('App listening on port ' + PORT))
 
 var http = require("http")
@@ -243,11 +188,11 @@ var pingFunction = function()
 {
   pingSet = false
 
-  //http.get(process.env.HEROKU_URL + "/ping")
+  http.get(process.env.HEROKU_URL + "/ping")
 
   console.log(Date.now())
 
-  require("./sql.js").query("select * from waketimes", function(err, result, fields)
+  sql.query("select * from waketimes", function(err, result, fields)
   {
     if (result)
     {
