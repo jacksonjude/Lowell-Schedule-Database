@@ -67,7 +67,7 @@ app.get('/update/', function(req, res)
     console.log("GET /update/ => OK")
     res.send("OK")
     updatingObjects = false
-  }, updater.getObjectsFromPDF)
+  }, updater.getObjectsFromCSV)
 })
 
 app.post('/session/', function(req, res)
