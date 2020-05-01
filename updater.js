@@ -244,7 +244,7 @@ function getObjectsFromCSV()
         if (coursesWithTitlesInNotes.includes(courseName))
           courseName += " - " + courseNotes2
 
-        var courseCode = courseName.replace(" ", "-")
+        var courseCode = courseName.replace(new RegExp("-", 'g'), "-")
 
         var courseExists = false
         for (courseNum in courses)
