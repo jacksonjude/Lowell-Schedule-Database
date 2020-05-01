@@ -215,6 +215,69 @@ function getObjectsFromTable(arenaData) //Fetching SchoolBlocks and SchoolCourse
   return [courses, blocks]
 }
 
+function getObjectsFromCSV()
+{
+  const startRow = 4
+  const coursesWithTitlesInNotes = ["AP English Language and Composition for Juniors", "AP English Literature and Composition for Seniors", "Upper Division Junior/Senior English A (Non AP)", "Upper Division Junior/Senior English B (Non AP)"]
+  const departments = ["Math", "Science", "English", "Social Studies", "VPA", "World Languages", "PE", "Other"]
+  var CSVParse = require("csv-parse")
+  var fs = require("fs")
+
+  var courses = []
+  var blocks = []
+
+  var objectsPromise = new Promise((resolve, reject) => {
+    var input = fs.readFileSync("courses.csv", {encoding: 'utf8'})
+    CSVParse(input, {}, function(err, courseOutput){
+      for (rowNum in courseOutput)
+      {
+        if (rowNum < startRow)
+          continue
+
+        var blockData = courseOutput[rowNum]
+
+        var departmentName = blockData[0]
+        var departmentNumber = departments.indexOf(departmentName)+1
+
+        var courseName = blockData[2]
+        var courseNotes2 = blockData[6]
+        if (coursesWithTitlesInNotes.includes(courseName))
+          courseName += " - " + courseNotes2
+
+        var courseCode = courseName
+
+        var courseExists = false
+        for (courseNum in courses)
+        {
+          var courseObject = courses[courseNum]
+          if (courseObject.departmentNum == departmentNumber && courseObject.courseCode == courseCode && courseObject.courseName == courseName)
+          {
+            courseExists = true
+            break
+          }
+        }
+
+        if (!courseExists)
+        {
+          var newCourse = new SchoolCourse(departmentNumber, courseCode, courseName)
+          courses.push(newCourse)
+        }
+
+        var blockNumber = blockData[1]
+        var teacherName = blockData[4]
+        var roomNumber = blockData[3]
+
+        var newBlock = new SchoolBlock(require("./sha256.js").SHA256(courseName + teacherName + blockNumber), null, blockNumber, roomNumber, teacherName, courseCode)
+        blocks.push(newBlock)
+      }
+
+      resolve([courses, blocks])
+    })
+  })
+
+  return objectsPromise
+}
+
 async function loadObjectsToSQL(courses, blocks, completion)
 {
   if (barEnabled)
@@ -269,3 +332,4 @@ var updateSQLObjects = function(completion, objectFunction)
 exports.updateSQLObjects = updateSQLObjects
 exports.getObjectsFromCourseSelection = getObjectsFromCourseSelection
 exports.getObjectsFromPDF = getObjectsFromPDF
+exports.getObjectsFromCSV = getObjectsFromCSV
