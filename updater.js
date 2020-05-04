@@ -217,7 +217,7 @@ function getObjectsFromTable(arenaData) //Fetching SchoolBlocks and SchoolCourse
 
 function getObjectsFromCSV()
 {
-  const startRow = 4
+  const startRow = 2
   const coursesWithTitlesInNotes = ["AP English Language and Composition for Juniors", "AP English Literature and Composition for Seniors", "Upper Division Junior/Senior English A (Non AP)", "Upper Division Junior/Senior English B (Non AP)"]
   const departments = ["Math", "Science", "English", "Social Studies", "VPA", "World Languages", "PE", "Other"]
   var CSVParse = require("csv-parse")
@@ -244,13 +244,20 @@ function getObjectsFromCSV()
         if (coursesWithTitlesInNotes.includes(courseName))
           courseName += " - " + courseNotes2
 
+        var blockNumber = blockData[1]
+        var semester = 0
+        if (blockNumber.toString().length >= 2)
+          semester = parseInt(blockNumber.toString().charAt(0))
+
+        if (semester > 0)
+          courseName += " (" + ((semester == 1) ? "A" : "B") + ")"
         var courseCode = require("./sha256.js").SHA256(courseName)
 
         var courseExists = false
         for (courseNum in courses)
         {
           var courseObject = courses[courseNum]
-          if (courseObject.departmentNum == departmentNumber && courseObject.courseCode == courseCode && courseObject.courseName == courseName)
+          if (courseObject.departmentNum == departmentNumber && courseObject.courseCode == courseCode && courseObject.courseName == courseName && courseObject.semester == semester)
           {
             courseExists = true
             break
@@ -259,11 +266,10 @@ function getObjectsFromCSV()
 
         if (!courseExists)
         {
-          var newCourse = new SchoolCourse(departmentNumber, courseCode, courseName)
+          var newCourse = new SchoolCourse(departmentNumber, courseCode, courseName, semester)
           courses.push(newCourse)
         }
 
-        var blockNumber = blockData[1]
         var teacherName = blockData[4]
         var roomNumber = blockData[3]
 

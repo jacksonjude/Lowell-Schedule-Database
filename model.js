@@ -1,10 +1,11 @@
 var sql = require("./sql.js")
 
-function SchoolCourse(departmentNum, courseCode, courseName)
+function SchoolCourse(departmentNum, courseCode, courseName, semester)
 {
   this.departmentNum = departmentNum
   this.courseCode = courseCode
   this.courseName = courseName
+  this.semester = semester ? semester : 0
 }
 
 SchoolCourse.prototype.loadToSQL = function()
@@ -13,11 +14,11 @@ SchoolCourse.prototype.loadToSQL = function()
   {
     var course = this
 
-    sql.query("select count(*) from courses where courseCode=\"" + course.courseCode + "\"", function(err, result, fields)
+    sql.query("select count(*) from courses where courseCode=\'" + course.courseCode + "\'", function(err, result, fields)
     {
-      if (result == null || parseInt(result[0]["count(*)"]) == 0)
+      if (result == null || parseInt(result["rows"][0]["count"]) == 0)
       {
-        sql.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "')", function(err, result, fields)
+        sql.query("insert into courses values ('" + course.departmentNum + "', '" + course.courseCode + "', '" + course.courseName + "', '" + course.semester + "')", function(err, result, fields)
         {
           resolve()
         })
@@ -48,9 +49,9 @@ SchoolBlock.prototype.loadToSQL = function()
   {
     var block = this
 
-    sql.query("select count(*) from blocks where sectionNumber=\"" + block.sectionNumber + "\"", function(err, result, fields)
+    sql.query("select count(*) from blocks where sectionNumber=\'" + block.sectionNumber + "\'", function(err, result, fields)
     {
-      if (result == null || parseInt(result[0]["count(*)"]) == 0)
+      if (result == null || parseInt(result["rows"][0]["count"]) == 0)
       {
         sql.query("insert into blocks values ('" + block.sectionNumber + "', '" + block.blockCode + "', " + block.blockNum + ", '" + block.roomNum + "', '" + block.teacher + "', '" + block.courseCode + "')", function(err, result, fields)
         {
