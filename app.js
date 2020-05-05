@@ -2,7 +2,33 @@ const express = require('express')
 const app = express()
 const fs = require('fs')
 const uuidv4 = require('uuid/v4');
+const { request } = require('graphql-request')
 const PORT = process.env.PORT || 3009
+
+const teacherReviewSource = "https://api.studentsreview.me"
+
+const departmentNameConvert = {
+  "Math":"Math",
+  "Computer Science":"Math",
+  "English":"English",
+  "Social Science":"Social Studies",
+  "Science":"Science",
+  "Visual Performing Arts":"VPA",
+  "Foreign Language":"World Languages",
+  "JROTC":"Other",
+  "Miscellaneous":"Other"
+}
+
+const departmentNumberConvert = {
+  "Math":1,
+  "Science":2,
+  "English":3,
+  "Social Studies":4,
+  "VPA":5,
+  "World Languages":6,
+  "PE":7,
+  "Other":8
+}
 
 var updater = require("./updater.js")
 var updatingObjects = false
@@ -154,6 +180,64 @@ app.get("/arena/", async function(req, res) {
     res.send(err)
   })
 })
+
+app.get("/teacher/", async function (req, res) {
+  var teacherReviewQuery = `{
+    findManyTeacher(filter: {
+      search: "` + req.query.search + `"
+    }) {
+      name
+    	rating
+      departments
+    }
+  }`
+
+  request(teacherReviewSource, teacherReviewQuery).then(data => {
+    var teacherDataArray = data["findManyTeacher"].concat()
+    for (teacherNum in teacherDataArray)
+    {
+      for (departmentNum in teacherDataArray[teacherNum]["departments"])
+      {
+        var departmentName = teacherDataArray[teacherNum]["departments"][departmentNum]
+        teacherDataArray[teacherNum]["departments"][departmentNum] = departmentNumberConvert[departmentNameConvert[departmentName]]
+      }
+    }
+
+    if (req.query.department != null)
+    {
+      for (i=teacherDataArray.length-1; i >= 0; i--)
+      {
+        if (!teacherDataArray[i]["departments"].includes(parseInt(req.query.department)))
+        {
+          teacherDataArray.splice(i, 1)
+        }
+      }
+    }
+
+    var teacherData = {}
+
+    if (teacherDataArray.length == 1)
+      teacherData = teacherDataArray[0]
+    if (teacherDataArray.length > 1)
+      teacherData = filterArrayByInitial(teacherDataArray, req.query.initial, teacherDataArray[0])
+    if (teacherDataArray.length == 0 && data["findManyTeacher"].length > 0)
+      teacherData = filterArrayByInitial(data["findManyTeacher"], req.query.initial, data["findManyTeacher"][0])
+
+    res.send(teacherData)
+  })
+})
+
+function filterArrayByInitial(teacherArray, initial, fallback)
+{
+  if (initial == null)
+    return fallback
+
+  var firstInitialFilter = teacherArray.filter((teacher) => { return teacher.name.toLowerCase().startsWith(initial) })
+  if (firstInitialFilter.length > 0)
+    return firstInitialFilter[0]
+  else
+    return {}
+}
 
 app.get('/ping/', function(req, res)
 {
